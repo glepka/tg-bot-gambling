@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { CreateEventPage } from "@/pages/CreateEventPage";
@@ -6,8 +7,19 @@ import { EventsListPage } from "@/pages/EventsListPage";
 import { MyEventsPage } from "@/pages/MyEventsPage";
 
 export default function App() {
+  useEffect(() => {
+    const webApp = window.Telegram?.WebApp;
+
+    if (!webApp) {
+      return;
+    }
+
+    webApp.ready();
+    webApp.expand?.();
+  }, []);
+
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter>
       <Routes>
         <Route element={<AppLayout />}>
           <Route index element={<EventsListPage />} />

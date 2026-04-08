@@ -77,17 +77,23 @@ export function EventDetailPage() {
   const [winPick, setWinPick] = useState<string>("");
   const [nowTs, setNowTs] = useState(() => Date.now());
 
-  const load = useCallback(async () => {
+  const load = useCallback(async ({ silent = false } = {}) => {
     if (!id) {
       setEvent(null);
-      setEventLoading(false);
+      if (!silent) {
+        setEventLoading(false);
+      }
       return;
     }
-    setEventLoading(true);
+    if (!silent) {
+      setEventLoading(true);
+    }
     const ev = await getEventById(id);
     if (!ev) {
       setEvent(null);
-      setEventLoading(false);
+      if (!silent) {
+        setEventLoading(false);
+      }
       return;
     }
     setEvent(ev);
@@ -95,13 +101,34 @@ export function EventDetailPage() {
 
     const betRows = await listBetsByEventId(id);
     setBets((betRows as Bet[]) ?? []);
-    setEventLoading(false);
+    if (!silent) {
+      setEventLoading(false);
+    }
   }, [id]);
 
   useEffect(() => {
     queueMicrotask(() => {
       void load();
     });
+  }, [load]);
+
+  useEffect(() => {
+    let inFlight = false;
+    const refreshLiveData = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        await load({ silent: true });
+      } finally {
+        inFlight = false;
+      }
+    };
+
+    const t = setInterval(() => {
+      void refreshLiveData();
+    }, 2000);
+
+    return () => clearInterval(t);
   }, [load]);
 
   useEffect(() => {

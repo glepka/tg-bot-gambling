@@ -22,13 +22,17 @@ export function EventsListPage() {
   const [err, setErr] = useState<string | null>(null);
   const [nowTs, setNowTs] = useState(() => Date.now());
 
-  const load = useCallback(async () => {
-    setErr(null);
+  const load = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) {
+      setErr(null);
+    }
     try {
       const data = await listEvents();
       setRows(data ?? []);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "unknown_error");
+      if (!silent) {
+        setErr(e instanceof Error ? e.message : "unknown_error");
+      }
       setRows([]);
     }
   }, []);
@@ -37,6 +41,25 @@ export function EventsListPage() {
     queueMicrotask(() => {
       void load();
     });
+  }, [load]);
+
+  useEffect(() => {
+    let inFlight = false;
+    const refreshLiveData = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        await load({ silent: true });
+      } finally {
+        inFlight = false;
+      }
+    };
+
+    const t = setInterval(() => {
+      void refreshLiveData();
+    }, 2000);
+
+    return () => clearInterval(t);
   }, [load]);
 
   useEffect(() => {

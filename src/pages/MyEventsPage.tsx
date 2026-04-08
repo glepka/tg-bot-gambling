@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
-import { listBetsByEventId, listMyEvents } from "@/lib/mockApi";
+import { listBetsByEventId, listMyRelatedEvents } from "@/lib/mockApi";
 import type { Bet, Event } from "@/types/local";
 import {
   Card,
@@ -50,7 +50,7 @@ export function MyEventsPage() {
       setBetsByEventId({});
       return;
     }
-    const data = await listMyEvents(profile.id);
+    const data = await listMyRelatedEvents(profile.id);
     const betRowsByEvent = await Promise.all(
       (data ?? []).map((e) => listBetsByEventId(e.id))
     );

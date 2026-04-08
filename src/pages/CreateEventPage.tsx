@@ -86,7 +86,7 @@ export function CreateEventPage() {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Кто выиграет матч?"
+              placeholder="Название события"
             />
           </div>
           <div className="space-y-2">

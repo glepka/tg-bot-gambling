@@ -174,6 +174,43 @@ export async function listMyEvents(profileId: string) {
   return attachOutcomes(safeEvents);
 }
 
+export async function listMyRelatedEvents(profileId: string) {
+  const [createdEvents, bets] = await Promise.all([
+    listMyEvents(profileId),
+    supabase
+      .from("bets")
+      .select("event_id")
+      .eq("user_id", profileId),
+  ]);
+
+  const { data: betRows, error: betsError } = bets;
+  if (betsError) throw new Error(betsError.message);
+
+  const relatedById = new Map(createdEvents.map((event) => [event.id, event]));
+  const betEventIds = Array.from(
+    new Set((betRows ?? []).map((row) => row.event_id).filter(Boolean)),
+  );
+
+  if (betEventIds.length > 0) {
+    const { data: participatedEvents, error: eventsError } = await supabase
+      .from("events")
+      .select("*")
+      .in("id", betEventIds)
+      .order("created_at", { ascending: false });
+
+    if (eventsError) throw new Error(eventsError.message);
+
+    const safeParticipatedEvents = await attachOutcomes((participatedEvents ?? []) as Event[]);
+    for (const event of safeParticipatedEvents) {
+      relatedById.set(event.id, event);
+    }
+  }
+
+  return Array.from(relatedById.values()).sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+}
+
 export async function getEventById(id: string) {
   const { data: event, error } = await supabase
     .from("events")
