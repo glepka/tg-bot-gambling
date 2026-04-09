@@ -176,6 +176,8 @@ export function EventDetailPage() {
   const badgeText =
     event?.status === "open" && accepting
       ? "идет прием ставок"
+      : event?.status === "open"
+      ? "ставок больше нет"
       : event?.status === "settled" && myWon
       ? "рассчитано"
       : event?.status === "settled" && myLost

@@ -101,7 +101,7 @@ export function EventsListPage() {
             const accepting =
               e.status === "open" && nowTs < new Date(e.closes_at).getTime();
 
-            const badgeText = accepting ? "идет прием ставок" : "приём";
+            const badgeText = accepting ? "идет прием ставок" : "ставок больше нет";
             const badgeClassName = accepting
               ? "border-yellow-600 bg-yellow-500/10 text-yellow-700 dark:border-yellow-500 dark:bg-yellow-400/15 dark:text-yellow-300"
               : "";
