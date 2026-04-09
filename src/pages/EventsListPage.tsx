@@ -85,6 +85,22 @@ export function EventsListPage() {
     );
   }
 
+  const sortedRows = [...rows].sort((a, b) => {
+    const aCloseTs = new Date(a.closes_at).getTime();
+    const bCloseTs = new Date(b.closes_at).getTime();
+    const aAccepting = a.status === "open" && aCloseTs > nowTs;
+    const bAccepting = b.status === "open" && bCloseTs > nowTs;
+
+    if (aAccepting !== bAccepting) {
+      return aAccepting ? -1 : 1;
+    }
+
+    const aDistance = Math.abs(aCloseTs - nowTs);
+    const bDistance = Math.abs(bCloseTs - nowTs);
+
+    return aDistance - bDistance;
+  });
+
   return (
     <div className="space-y-4">
       <div>
@@ -97,7 +113,7 @@ export function EventsListPage() {
         <p className="text-sm text-muted-foreground">Пока нет открытых событий.</p>
       ) : (
         <ul className="space-y-3">
-          {rows.map((e) => {
+          {sortedRows.map((e) => {
             const accepting =
               e.status === "open" && nowTs < new Date(e.closes_at).getTime();
 
