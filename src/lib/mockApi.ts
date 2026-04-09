@@ -313,7 +313,27 @@ export async function createEvent(input: {
 
   if (outcomesError) throw new Error(outcomesError.message);
 
-  return eventId;
+  const { error: notifyError, data: notifyData } = await supabase.functions.invoke(
+    "notify-event-created",
+    {
+      body: {
+        eventId,
+        title: input.title,
+        description: input.description,
+        closesAtIso: input.closesAtIso,
+        outcomeLabels: input.outcomeLabels,
+        creatorUsername: profile.username,
+      },
+    },
+  );
+
+  const notificationSent = !notifyError && notifyData?.ok !== false;
+
+  return {
+    eventId,
+    notificationSent,
+    notificationError: notifyError?.message ?? (notificationSent ? null : "notify_failed"),
+  };
 }
 
 export async function closeEventEarly(eventId: string) {

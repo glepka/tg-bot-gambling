@@ -55,15 +55,22 @@ export function CreateEventPage() {
       return;
     }
     setBusy(true);
-    const id = await createEvent({
-      title: title.trim(),
-      description: description.trim() || null,
-      closesAtIso: closesAt.toISOString(),
-      outcomeLabels: labels,
-    });
-    setBusy(false);
-    toast.success("Событие создано");
-    nav(`/events/${id}`);
+    try {
+      const result = await createEvent({
+        title: title.trim(),
+        description: description.trim() || null,
+        closesAtIso: closesAt.toISOString(),
+        outcomeLabels: labels,
+      });
+
+      toast.success("Событие создано");
+      if (!result.notificationSent) {
+        toast.warning("Событие создано, но уведомление в Telegram не отправлено");
+      }
+      nav(`/events/${result.eventId}`);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (

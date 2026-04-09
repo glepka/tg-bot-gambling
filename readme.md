@@ -71,3 +71,31 @@ export default defineConfig([
   },
 ])
 ```
+
+## Telegram notification after event creation
+
+The project includes a Supabase Edge Function `notify-event-created` that sends a message to all bot users in private chats after a new event is created.
+
+### 1) Set required secrets
+
+```bash
+supabase secrets set TELEGRAM_BOT_TOKEN=your_bot_token
+```
+
+Or use an env file:
+
+```bash
+supabase secrets set --env-file .env
+```
+
+### 2) Deploy function
+
+```bash
+supabase functions deploy notify-event-created
+```
+
+### 3) Verify behavior
+
+- Create a new event from `CreateEventPage`.
+- Check that users who already started the bot receive a private message.
+- If Telegram API is unavailable or required secrets are missing, the event is still created and UI shows a warning toast.
